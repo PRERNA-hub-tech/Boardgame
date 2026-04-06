@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment # Kubernetes resource kind we are creating
+metadata:
+  name: boardgame-deployment
+spec:
+  selector:
+    matchLabels:
+      app: boardgame
+  replicas: 2 # Number of replicas that will be created for this deployment
+  template:
+    metadata:
+      labels:
+        app: boardgame
+    spec:
+      containers:
+        - name: boardgame
+          image: adijaiswal/boardshack:latest # Image that will be used to run containers in the cluster
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080 # The port that the container is running on in the cluster
+
+          # ✅ Resource requests and limits for performance and reliability
+          resources:
+            requests:
+              cpu: "200m"      # Minimum 0.2 CPU core requested
+              memory: "256Mi"  # Minimum 256 MB RAM requested
+            limits:
+              cpu: "500m"      # Maximum 0.5 CPU core allowed
+              memory: "512Mi"  # Maximum 512 MB RAM allowed
+---
+apiVersion: v1 # Kubernetes API version
+kind: Service # Kubernetes resource kind we are creating
+metadata: # Metadata of the resource kind we are creating
+  name: boardgame-ssvc
+spec:
+  selector:
+    app: boardgame
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080 
+  type: LoadBalancer # type of the service.
